@@ -14,6 +14,8 @@ def input_error(func):
             return "Give me name and phone please."
         except KeyError:
             return "This contact doesn't exist."
+        except AttributeError:
+            return "This contact doesn't exist."
         except IndexError:
             return "Enter the argument for the command."
         
@@ -40,8 +42,6 @@ def add_contact(args, book: AddressBook):
 def change_contact(args, book: AddressBook ):
     name, old_phone, new_phone = args
     record = book.find(name)
-    if record is None:
-        return "This contact doesn't exist."
     if record.find_phone(old_phone) is None:
         return "Phone not found."
     record.edit_phone(old_phone, new_phone)
@@ -51,8 +51,6 @@ def change_contact(args, book: AddressBook ):
 def show_phone(args, book: AddressBook):
     name = args[0]
     record = book.find(name)
-    if record is None:
-        return "This contact doesn't exist."
     return "; ".join(phone.value for phone in record.phones)
 
 @input_error
@@ -65,12 +63,7 @@ def add_birthday(args, book):
     if len(args) != 2:
         return "Usage: add-birthday <name> <DD.MM.YYYY>"
     record = book.find(args[0])
-    if record is None:
-        return "This contact doesn't exist."
-    try:
-        record.add_birthday(args[1])
-    except ValueError as error:
-        return str(error)
+    record.add_birthday(args[1])
     return "Birthday added."
 
 @input_error
@@ -78,11 +71,9 @@ def show_birthday(args, book):
     if len(args) != 1:
         return "Usage: show-birthday <name>"
     record = book.find(args[0])
-    if record is None:
-        return "This contact doesn't exist."
     if record.birthday is None:
         return "Birthday is not set."
-    return record.birthday.value.strftime("%d.%m.%Y")
+    return record.birthday.value
 
 @input_error
 def birthdays(args, book):

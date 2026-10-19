@@ -33,12 +33,12 @@ class Birthday(Field):
         if not isinstance(value, str):
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
         try:
-            birthday = datetime.strptime(value, "%d.%m.%Y").date()
+            birthday = datetime.strptime(value, "%d.%m.%Y")
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
         if birthday.strftime("%d.%m.%Y") != value:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
-        super().__init__(birthday)
+        super().__init__(value)
 
 class Record:
     def __init__(self, name):
@@ -79,7 +79,12 @@ class Record:
         
     
     def __str__(self):
-                return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        phones = "; ".join(phone.value for phone in self.phones)
+        birthday = self.birthday.value if self.birthday is not None else "not set"
+        return (
+            f"Contact name: {self.name.value}, phones: {phones}, "
+            f"birthday: {birthday}"
+        )
             
   
 class AddressBook(UserDict): 
@@ -101,7 +106,9 @@ class AddressBook(UserDict):
             if record.birthday is None:
                 continue
 
-            birthday = record.birthday.value
+            birthday = datetime.strptime(
+                record.birthday.value, "%d.%m.%Y"
+            ).date()
             for year in (today.year, today.year + 1):
                 try:
                     next_birthday = birthday.replace(year=year)
